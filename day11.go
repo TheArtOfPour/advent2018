@@ -2,120 +2,99 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"strconv"
 )
 
-func abs(i int) int {
-	if i < 0 {
-		i *= -1
+func calculatePower(x int, y int, serialNumber int) int {
+	rackID := x + 10
+	powerLevel := rackID * y
+	powerLevel += serialNumber
+	powerLevel *= rackID
+	// get hundreds place
+	hundredsPlace := 0
+	powerLevel %= 1000
+	if powerLevel >= 100 {
+		slice := strconv.Itoa(powerLevel)
+		hundredsPlace, _ = strconv.Atoi(string(slice[0]))
 	}
-	return i
-}
+	powerLevel = hundredsPlace - 5
 
-func min(a int, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func getDistance(coords map[string]int) int {
-	//  (x,  y, z)
-	//+ (ne, n, nw)
-	//- (sw, s, se)
-	if coords["x"] > 0 && coords["y"] < 0 {
-		min := min(coords["x"], abs(coords["y"]))
-		coords["x"] -= min
-		coords["y"] += min
-		coords["z"] -= min
-	} else if coords["y"] > 0 && coords["z"] < 0 {
-		min := min(coords["y"], abs(coords["z"]))
-		coords["y"] -= min
-		coords["z"] += min
-		coords["x"] += min
-	} else if coords["z"] > 0 && coords["x"] > 0 {
-		min := min(coords["z"], coords["x"])
-		coords["z"] -= min
-		coords["x"] -= min
-		coords["y"] += min
-	} else if coords["y"] > 0 && coords["x"] < 0 {
-		min := min(coords["y"], abs(coords["x"]))
-		coords["y"] -= min
-		coords["x"] += min
-		coords["z"] += min
-	} else if coords["z"] > 0 && coords["y"] < 0 {
-		min := min(coords["z"], abs(coords["y"]))
-		coords["z"] -= min
-		coords["y"] += min
-		coords["x"] -= min
-	} else if coords["x"] < 0 && coords["z"] < 0 {
-		min := min(abs(coords["x"]), abs(coords["z"]))
-		coords["x"] += min
-		coords["z"] += min
-		coords["y"] -= min
-	}
-	return abs(coords["x"]) + abs(coords["y"]) + abs(coords["z"])
+	return powerLevel
 }
 
 func advent11A(test string) int {
-	//  (x,  y, z)
-	//+ (ne, n, nw)
-	//- (sw, s, se)
-	coords := make(map[string]int)
-	coords["x"] = 0
-	coords["y"] = 0
-	coords["z"] = 0
-	directions := strings.Split(test, ",")
-	for _, direction := range directions {
-		switch direction {
-		case "ne":
-			coords["x"]++
-		case "n":
-			coords["y"]++
-		case "nw":
-			coords["z"]++
-		case "sw":
-			coords["x"]--
-		case "s":
-			coords["y"]--
-		case "se":
-			coords["z"]--
-		default:
-			panic(fmt.Sprintf("invalid direction %s", direction))
+	serialNumber, _ := strconv.Atoi(test)
+	// for each cell (300x300) calculate power
+	grid := make([][]int, 300)
+	for i := range grid {
+		grid[i] = make([]int, 300)
+		for j := range grid[i] {
+			grid[i][j] = calculatePower(i, j, serialNumber)
+			//fmt.Printf("%d\t", grid[i][j])
+		}
+		//fmt.Printf("\n")
+	}
+	//fmt.Printf("\n")
+
+	maxPower := 0
+	maxX := 0
+	maxY := 0
+	for i := 0; i <= len(grid)-3; i++ {
+		for j := 0; j <= len(grid[i])-3; j++ {
+			clusterPower :=
+				grid[i][j] + grid[i][j+1] + grid[i][j+2] +
+					grid[i+1][j] + grid[i+1][j+1] + grid[i+1][j+2] +
+					grid[i+2][j] + grid[i+2][j+1] + grid[i+2][j+2]
+			if clusterPower > maxPower {
+				maxPower = clusterPower
+				maxX = i // shift for array index
+				maxY = j
+			}
 		}
 	}
-	return getDistance(coords)
+	fmt.Printf("(%d,%d) %d \n", maxX, maxY, maxPower)
+
+	// crawl through with 3x3 frames summing up and storing max
+
+	return 0
 }
 
 func advent11B(test string) int {
-	coords := make(map[string]int)
-	coords["x"] = 0
-	coords["y"] = 0
-	coords["z"] = 0
-	directions := strings.Split(test, ",")
-	max := 0
-	for _, direction := range directions {
-		switch direction {
-		case "ne":
-			coords["x"]++
-		case "n":
-			coords["y"]++
-		case "nw":
-			coords["z"]++
-		case "sw":
-			coords["x"]--
-		case "s":
-			coords["y"]--
-		case "se":
-			coords["z"]--
-		default:
-			panic(fmt.Sprintf("invalid direction %s", direction))
-		}
-		distance := getDistance(coords)
-		if distance > max {
-			max = distance
+	serialNumber, _ := strconv.Atoi(test)
+	grid := make([][]int, 300)
+	for i := range grid {
+		grid[i] = make([]int, 300)
+		for j := range grid[i] {
+			grid[i][j] = calculatePower(i, j, serialNumber)
 		}
 	}
-	fmt.Printf("%v\n", coords)
-	return max
+
+	maxPower := 0
+	maxX := 0
+	maxY := 0
+	maxSize := 0
+
+	for size := 0; size <= len(grid); size++ { // grid size
+		for startX := 0; startX <= len(grid)-size; startX++ { // frame
+			for startY := 0; startY <= len(grid)-size; startY++ { // frame
+				clusterPower := 0
+				for i := startX; i < startX+size; i++ {
+					for j := startY; j < startY+size; j++ {
+						clusterPower += grid[i][j]
+					}
+				}
+				if clusterPower > maxPower {
+					maxPower = clusterPower
+					maxX = startX // shift for array index
+					maxY = startY
+					maxSize = size
+				}
+			}
+		}
+	}
+	fmt.Printf("(%d,%d,%d) %d \n", maxX, maxY, maxSize, maxPower)
+
+	// crawl through with 3x3 frames summing up and storing max
+
+	return 0
 }

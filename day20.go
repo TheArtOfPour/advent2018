@@ -29,7 +29,7 @@ func moveParticle(in *particle) {
 }
 
 func getParticleDistance(in particle) int {
-	return abs(in.pos.x) + abs(in.pos.y) + abs(in.pos.z)
+	return 0 //abs(in.pos.x) + abs(in.pos.y) + abs(in.pos.z)
 }
 
 func advent20A(test string) int {

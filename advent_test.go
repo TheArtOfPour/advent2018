@@ -286,5 +286,39 @@ position=<-3,  6> velocity=< 2, -1>`
 	// }
 }
 
+func TestDay11(t *testing.T) {
+	unitTest := calculatePower(3, 5, 8)
+	unitExpected := 4
+	if !cmp.Equal(unitTest, unitExpected) {
+		t.Errorf("Didn't match %s", cmp.Diff(unitTest, unitExpected))
+	}
+	unitTest = calculatePower(122, 79, 57)
+	unitExpected = -5
+	if !cmp.Equal(unitTest, unitExpected) {
+		t.Errorf("Didn't match %s", cmp.Diff(unitTest, unitExpected))
+	}
+	unitTest = calculatePower(217, 196, 39)
+	unitExpected = 0
+	if !cmp.Equal(unitTest, unitExpected) {
+		t.Errorf("Didn't match %s", cmp.Diff(unitTest, unitExpected))
+	}
+	unitTest = calculatePower(101, 153, 71)
+	unitExpected = 4
+	if !cmp.Equal(unitTest, unitExpected) {
+		t.Errorf("Didn't match %s", cmp.Diff(unitTest, unitExpected))
+	}
+	// input := `18`
+	// out := advent11A(input)
+	// expected := 138
+	// if !cmp.Equal(out, expected) {
+	// 	t.Errorf("Didn't match %s", cmp.Diff(out, expected))
+	// }
+	// out = advent11B(input)
+	// expected = 66
+	// if !cmp.Equal(out, expected) {
+	// 	t.Errorf("Didn't match %s", cmp.Diff(out, expected))
+	// }
+}
+
 func TestAdvent(t *testing.T) {
 }
