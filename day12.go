@@ -1,119 +1,146 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
 	"strings"
 )
 
-// Vertex bi-directional graph vertex
-type Vertex struct {
-	value int
-	edges []*Vertex
-}
-
-func buildGraph(root *Vertex, inputs map[int][]int, seen map[int]bool) {
-	_, ok := seen[root.value]
-	if ok {
-		return
-	}
-	seen[root.value] = true
-	for _, linked := range inputs[root.value] {
-		var temp Vertex
-		temp.value = linked
-		root.edges = append(root.edges, &temp)
-		temp.edges = append(temp.edges, root)
-		buildGraph(&temp, inputs, seen)
-	}
-}
-
-func countGraphEdges(root *Vertex, seen map[int]bool) int {
-	_, ok := seen[root.value]
-	if ok {
-		return 0
-	}
-	seen[root.value] = true
-	sum := 0
-	for _, edge := range root.edges {
-		sum += countGraphEdges(edge, seen)
-	}
-	return sum + 1
+type grule struct {
+	condition string
+	result    rune
 }
 
 func advent12A(test string) int {
-	inputs := make(map[int][]int)
-	scanner := bufio.NewScanner(strings.NewReader(test))
-	for scanner.Scan() {
-		s := scanner.Text()
-		stringParts := strings.Split(s, " <-> ")
-		program, _ := strconv.Atoi(stringParts[0])
-		linkedParts := strings.Split(stringParts[1], ", ")
-		var temp []int
-		for _, linked := range linkedParts {
-			ilinked, _ := strconv.Atoi(linked)
-			temp = append(temp, ilinked)
-		}
-		inputs[program] = temp
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
-	}
-	var root Vertex
-	root.value = 0
-	seen := make(map[int]bool)
-	buildGraph(&root, inputs, seen)
+	result := 0
 
-	seen = make(map[int]bool)
-	return countGraphEdges(&root, seen)
-}
+	stringSlice := strings.Split(test, "\n")
 
-func advent12B(test string) int {
-	inputs := make(map[int][]int)
-	scanner := bufio.NewScanner(strings.NewReader(test))
-	for scanner.Scan() {
-		s := scanner.Text()
-		stringParts := strings.Split(s, " <-> ")
-		program, _ := strconv.Atoi(stringParts[0])
-		linkedParts := strings.Split(stringParts[1], ", ")
-		var temp []int
-		for _, linked := range linkedParts {
-			ilinked, _ := strconv.Atoi(linked)
-			temp = append(temp, ilinked)
+	// get initial state
+	plants := strings.TrimLeft(stringSlice[0], "initial state: ")
+	plants = strings.TrimSuffix(plants, "\r")
+
+	// get rules
+	grules := make([]grule, 0)
+	for _, s := range stringSlice[2:] {
+		s = strings.TrimSuffix(s, "\r")
+		parts := strings.Split(s, " => ")
+		r := grule{condition: parts[0], result: rune(parts[1][0])}
+		grules = append(grules, r)
+	}
+
+	// iterate through generations
+	indexOffset := 0 // subtract from this every time a plant is added to the front of the array
+	//plants = "..." + plants
+	for generation := 0; generation <= 19; generation++ {
+		plants = ".." + plants
+		if plants[2] == '#' {
+			plants = "." + plants
+			indexOffset--
 		}
-		inputs[program] = temp
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
-	}
-	groups := 0
-	graphs := make(map[*Vertex][]int)
-	for input := range inputs {
-		haveSeen := false
-		for _, graph := range graphs {
-			for _, seenValue := range graph {
-				if input == seenValue {
-					haveSeen = true
+		plants = plants + "..."
+		if generation < 10 {
+			fmt.Print(" ")
+		}
+		fmt.Printf("%d: ", generation)
+		for i := 0; i < 10+indexOffset; i++ {
+			fmt.Print(" ")
+		}
+		fmt.Printf("%s\n", plants)
+		newPlants := make([]rune, 0)
+		for i := 2; i < len(plants)-2; i++ {
+			frame := string([]byte{plants[i-2], plants[i-1], plants[i], plants[i+1], plants[i+2]})
+			found := false
+			for _, rule := range grules {
+				if frame == rule.condition {
+					newPlants = append(newPlants, rule.result)
+					found = true
 					break
 				}
 			}
-			if haveSeen {
-				break
+			if !found {
+				newPlants = append(newPlants, '.')
 			}
 		}
-		if !haveSeen {
-			var root Vertex
-			root.value = input
-			seen := make(map[int]bool)
-			buildGraph(&root, inputs, seen)
-			keys := make([]int, 0, len(seen))
-			for k := range seen {
-				keys = append(keys, k)
-			}
-			graphs[&root] = keys
-			groups++
+		plants = string(newPlants)
+	}
+
+	for i := 0; i < len(plants); i++ {
+		if plants[i] == '#' {
+			result += i + indexOffset
 		}
 	}
-	return groups
+
+	return result
+}
+
+func advent12B(test string) int {
+	result := 0
+
+	stringSlice := strings.Split(test, "\n")
+
+	// get initial state
+	plants := strings.TrimLeft(stringSlice[0], "initial state: ")
+	plants = strings.TrimSuffix(plants, "\r")
+	// plantsBool := make([]bool, 0)
+	// for i := 0; i < len(plants); i++ {
+	// 	plantsBool = append(plantsBool, plants[i] == '#')
+	// }
+
+	// get rules
+	grules := make([]grule, 0)
+	for _, s := range stringSlice[2:] {
+		s = strings.TrimSuffix(s, "\r")
+		parts := strings.Split(s, " => ")
+		r := grule{condition: parts[0], result: rune(parts[1][0])}
+		grules = append(grules, r)
+	}
+
+	// iterate through generations
+	indexOffset := 0
+	for generation := 0; generation <= 252; generation++ {
+		plants = ".." + plants
+		//plantsBool = append([]bool{false, false}, plantsBool...)
+		if plants[2] == '#' {
+			plants = "." + plants
+			//plantsBool = append([]bool{false}, plantsBool...)
+			indexOffset--
+		}
+		if generation < 10 {
+			fmt.Print(" ")
+		}
+		if generation < 100 {
+			fmt.Print(" ")
+		}
+		fmt.Printf("%d: ", generation)
+		for i := 0; i < 10+indexOffset; i++ {
+			fmt.Print(" ")
+		}
+		fmt.Printf("%s\n", plants)
+		plants = plants + "..."
+		//plantsBool = append(plantsBool, []bool{false, false, false})
+		newPlants := make([]rune, 0)
+		for i := 2; i < len(plants)-2; i++ {
+			frame := string([]byte{plants[i-2], plants[i-1], plants[i], plants[i+1], plants[i+2]})
+			found := false
+			for _, rule := range grules {
+				if frame == rule.condition {
+					newPlants = append(newPlants, rule.result)
+					found = true
+					break
+				}
+			}
+			if !found {
+				newPlants = append(newPlants, '.')
+			}
+		}
+		plants = string(newPlants)
+	}
+
+	for i := 0; i < len(plants); i++ {
+		if plants[i] == '#' {
+			result += i + indexOffset
+		}
+	}
+
+	return result
 }

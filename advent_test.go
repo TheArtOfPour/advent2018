@@ -320,5 +320,34 @@ func TestDay11(t *testing.T) {
 	// }
 }
 
+func TestDay12(t *testing.T) {
+	input := `initial state: #..#.#..##......###...###
+
+...## => #
+..#.. => #
+.#... => #
+.#.#. => #
+.#.## => #
+.##.. => #
+.#### => #
+#.#.# => #
+#.### => #
+##.#. => #
+##.## => #
+###.. => #
+###.# => #
+####. => #`
+	out := advent12A(input)
+	expected := 325
+	if !cmp.Equal(out, expected) {
+		t.Errorf("Didn't match %s", cmp.Diff(out, expected))
+	}
+	// out = advent12B(input)
+	// expected = 66
+	// if !cmp.Equal(out, expected) {
+	// 	t.Errorf("Didn't match %s", cmp.Diff(out, expected))
+	// }
+}
+
 func TestAdvent(t *testing.T) {
 }
