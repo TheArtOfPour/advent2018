@@ -349,5 +349,31 @@ func TestDay12(t *testing.T) {
 	// }
 }
 
+func TestDay13(t *testing.T) {
+	input := `/->-\        
+|   |  /----\
+| /-+--+-\  |
+| | |  | v  |
+\-+-/  \-+--/
+  \------/   `
+	out := advent13A(input)
+	expected := 1
+	if !cmp.Equal(out, expected) {
+		t.Errorf("Didn't match %s", cmp.Diff(out, expected))
+	}
+	input = `/>-<\  
+|   |  
+| /<+-\
+| | | v
+\>+</ |
+  |   ^
+  \<->/`
+	out = advent13B(input)
+	expected = 1
+	if !cmp.Equal(out, expected) {
+		t.Errorf("Didn't match %s", cmp.Diff(out, expected))
+	}
+}
+
 func TestAdvent(t *testing.T) {
 }

@@ -201,6 +201,9 @@ func advent7A(test string) (string, error) {
 }
 
 func advent7B(test string) (int, error) {
+
+	// implement as heap?
+
 	instructions := getStepPairs(test)
 	done := make([]rune, 0)
 	lastStep := ' '
