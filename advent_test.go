@@ -374,6 +374,27 @@ func TestDay13(t *testing.T) {
 		t.Errorf("Didn't match %s", cmp.Diff(out, expected))
 	}
 }
+func TestDay17(t *testing.T) {
+	input := `x=495, y=2..7
+y=7, x=495..501
+x=501, y=3..7
+x=498, y=2..4
+x=506, y=1..2
+x=498, y=10..13
+x=504, y=10..13
+y=13, x=498..504`
+	out := advent17A(input)
+	expected := 57
+	if !cmp.Equal(out, expected) {
+		t.Errorf("Didn't match %s", cmp.Diff(out, expected))
+	}
+	// input = ``
+	// out = advent17B(input)
+	// expected = 1
+	// if !cmp.Equal(out, expected) {
+	// 	t.Errorf("Didn't match %s", cmp.Diff(out, expected))
+	// }
+}
 
 func TestAdvent(t *testing.T) {
 }
